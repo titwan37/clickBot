@@ -26,6 +26,5 @@ def test_workflow_engine_wait_step():
 
     assert success is True
     assert "job_started" in events
-    assert "step_started" in events
     assert "step_success" in events
     assert "job_completed" in events

@@ -8,6 +8,7 @@ import {
   XCircle,
   AlertTriangle,
   Info,
+  Clock,
 } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
@@ -21,16 +22,43 @@ interface TelemetryPanelProps {
   onStartResizing: () => void;
 }
 
-// Helper to format log data into readable text
+// Action color helper to color card borders by action type
+export const getActionBorderColor = (action: string | undefined, colors: any): string => {
+  switch (action) {
+    case 'hook_window':
+      return colors.warning || '#eab308';
+    case 'mouse_click':
+      return colors.accent || '#38bdf8';
+    case 'screenshot':
+      return colors.success || '#10b981';
+    case 'wait':
+      return '#a855f7'; // purple
+    default:
+      return colors.border;
+  }
+};
+
+// Helper to format log data into clean, readable text
 const formatLogData = (data: any): string => {
   if (!data) return '';
   if (typeof data === 'string') return data;
 
   const parts: string[] = [];
   if (data.step_id) parts.push(`Step: ${data.step_id}`);
-  if (data.label) parts.push(`Label: ${data.label}`);
+  if (data.label && data.label !== data.action) parts.push(`Label: ${data.label}`);
   if (data.action) parts.push(`Action: ${data.action.replace(/_/g, ' ')}`);
-  if (data.duration_ms) parts.push(`Duration: ${(data.duration_ms / 1000).toFixed(2)}s`);
+
+  // Start & Stop time + Duration
+  if (data.start_time && data.stop_time) {
+    const startStr = data.start_time.includes('T') ? data.start_time.split('T')[1].slice(0, 8) : data.start_time;
+    const stopStr = data.stop_time.includes('T') ? data.stop_time.split('T')[1].slice(0, 8) : data.stop_time;
+    parts.push(`Time: ${startStr} → ${stopStr}`);
+  }
+  if (data.duration_ms !== undefined) {
+    parts.push(`Duration: ${(data.duration_ms / 1000).toFixed(2)}s`);
+  }
+
+  // Click details
   if (data.details?.clicked_location) {
     const loc = data.details.clicked_location;
     parts.push(`Click: (${loc.x}, ${loc.y})`);
@@ -39,12 +67,24 @@ const formatLogData = (data: any): string => {
     const rel = data.details.relative_to_window;
     parts.push(`Relative: (${rel.x}, ${rel.y})`);
   }
+
+  // File path
   if (data.details?.file_path) {
     const fileName = data.details.file_path.split(/[/|\\]/).pop();
     parts.push(`File: ${fileName}`);
   }
+
+  // Hooked Window details
   if (data.details?.window?.title) {
     parts.push(`Window: "${data.details.window.title}"`);
+  }
+  if (data.details?.window?.pid) {
+    parts.push(`PID: ${data.details.window.pid}`);
+  }
+
+  // Waited seconds (for wait action)
+  if (data.details?.waited_seconds !== undefined && !data.duration_ms) {
+    parts.push(`Waited: ${data.details.waited_seconds}s`);
   }
 
   return parts.length > 0 ? parts.join(' • ') : JSON.stringify(data);
@@ -248,18 +288,31 @@ export const TelemetryPanel: React.FC<TelemetryPanelProps> = ({
                 const fullUrl = details?.url || log.data?.url;
                 const pixelInfo = details?.pixels_around_mouse || details?.window?.pixels_around_mouse;
 
+                // Determine action type from data or event
+                const actionType: string | undefined = log.data?.action || log.data?.details?.action;
+                const actionBorderColor = getActionBorderColor(actionType, c);
+
+                // Start/stop and duration timestamps
+                const startTime = log.data?.start_time || details?.start_time;
+                const stopTime = log.data?.stop_time || details?.stop_time;
+                const durationMs = log.data?.duration_ms;
+
                 return (
                   <div
                     key={i}
                     style={{
                       background: c.bgSecondary,
                       border: `1px solid ${c.border}`,
+                      borderLeft: actionType ? `4px solid ${actionBorderColor}` : `1px solid ${c.border}`,
                       borderRadius: 8,
                       padding: 10,
                       transition: 'border-color 0.2s',
                     }}
                     onMouseEnter={(e) => (e.currentTarget.style.borderColor = c.borderLight || c.accent)}
-                    onMouseLeave={(e) => (e.currentTarget.style.borderColor = c.border)}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = c.border;
+                      if (actionType) e.currentTarget.style.borderLeftColor = actionBorderColor;
+                    }}
                   >
                     {/* Event Header */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
@@ -279,9 +332,56 @@ export const TelemetryPanel: React.FC<TelemetryPanelProps> = ({
                         <span style={{ color: color, fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                           {log.event.replace(/_/g, ' ')}
                         </span>
+                        {actionType && (
+                          <span
+                            style={{
+                              fontSize: 10,
+                              fontWeight: 700,
+                              padding: '1px 6px',
+                              borderRadius: 4,
+                              background: `${actionBorderColor}20`,
+                              color: actionBorderColor,
+                              border: `1px solid ${actionBorderColor}40`,
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.04em'
+                            }}
+                          >
+                            {actionType.replace(/_/g, ' ')}
+                          </span>
+                        )}
                       </div>
                       <span style={{ color: c.textMuted, fontSize: 10 }}>{log.timestamp}</span>
                     </div>
+
+                    {/* Execution Timestamps Badge (Start -> Stop + Duration) */}
+                    {(startTime || durationMs !== undefined) && (
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 6,
+                          fontSize: 11,
+                          color: c.textMuted,
+                          marginBottom: 6,
+                          padding: '2px 6px',
+                          background: `${c.bgPrimary}90`,
+                          borderRadius: 4,
+                          width: 'fit-content'
+                        }}
+                      >
+                        <Clock size={11} color={c.textMuted} />
+                        {startTime && stopTime ? (
+                          <span>
+                            {startTime.includes('T') ? startTime.split('T')[1].slice(0, 8) : startTime} → {stopTime.includes('T') ? stopTime.split('T')[1].slice(0, 8) : stopTime}
+                          </span>
+                        ) : null}
+                        {durationMs !== undefined && (
+                          <span style={{ color: actionBorderColor, fontWeight: 700 }}>
+                            ({(durationMs / 1000).toFixed(2)}s)
+                          </span>
+                        )}
+                      </div>
+                    )}
 
                     {/* Formatted Data */}
                     {log.data && (

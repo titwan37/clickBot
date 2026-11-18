@@ -73,14 +73,7 @@ class WorkflowEngine:
 
                     step_label = step.label or step.action
                     start_time = time.time()
-
-                    emit("step_started", {
-                        "iteration": iteration,
-                        "step_index": idx,
-                        "step_id": step.step_id,
-                        "label": step_label,
-                        "action": step.action
-                    })
+                    start_time_iso = time.strftime("%H:%M:%S")
 
                     step_result: Dict[str, Any] = {}
                     step_status = "success"
@@ -182,12 +175,15 @@ class WorkflowEngine:
                         logger.error(f"[Step {step.step_id} FAILED] {err}")
 
                     duration_ms = round((time.time() - start_time) * 1000, 1)
+                    stop_time_iso = time.strftime("%H:%M:%S")
 
                     if step_status == "success":
                         emit("step_success", {
                             "step_id": step.step_id,
                             "label": step_label,
                             "action": step.action,
+                            "start_time": start_time_iso,
+                            "stop_time": stop_time_iso,
                             "duration_ms": duration_ms,
                             "details": step_result
                         })
@@ -196,6 +192,8 @@ class WorkflowEngine:
                             "step_id": step.step_id,
                             "label": step_label,
                             "action": step.action,
+                            "start_time": start_time_iso,
+                            "stop_time": stop_time_iso,
                             "duration_ms": duration_ms,
                             "error": step_error
                         })

@@ -117,6 +117,9 @@ function AppContent() {
 
           if (payload.event === 'step_started') {
             setActiveStepId(payload.data.step_id);
+          } else if (payload.event === 'step_success' || payload.event === 'step_failed') {
+            // Step finished - clear active indicator or update to next
+            setActiveStepId(null);
           } else if (payload.event === 'job_completed' || payload.event === 'job_aborted' || payload.event === 'job_error') {
             setIsRunning(false);
             setActiveStepId(null);
