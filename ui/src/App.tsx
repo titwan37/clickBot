@@ -1,16 +1,20 @@
 import { useState, useEffect } from 'react';
 import type { Job, Step, ActionType, Region, LogEvent } from './types';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { Header } from './components/Header';
-import { TelemetryPanel } from './components/TelemetryPanel';
 import { CanvasRegionPicker } from './components/CanvasRegionPicker';
-import { StepEditModal } from './components/StepEditModal';
 import { WorkflowLoadModal } from './components/WorkflowLoadModal';
+import { StepEditModal } from './components/StepEditModal';
+import { TelemetryPanel } from './components/TelemetryPanel';
 import { StepCard } from './components/StepCard';
 import {
   Camera, MousePointer, Clock, Crosshair, Layers, GripVertical
 } from 'lucide-react';
 
-export function App() {
+function AppContent() {
+  const { theme, toggleTheme } = useTheme();
+  const c = theme.colors;
+
   const [job, setJob] = useState<Job>({
     job_id: 'job_' + Date.now().toString().slice(-4),
     name: 'Sample Click & Evidence Workflow',
@@ -239,7 +243,15 @@ export function App() {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#090d16', color: '#f1f5f9' }}>
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100vh',
+      background: c.bgPrimary,
+      color: c.textPrimary,
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+      transition: 'background 0.3s ease, color 0.3s ease'
+    }}>
       {/* Top Header */}
       <Header
         isRunning={isRunning}
@@ -247,6 +259,7 @@ export function App() {
         onSaveJob={handleSaveJob}
         onRunJob={handleRunJob}
         onStopJob={handleStopJob}
+        toggleTheme={toggleTheme}
       />
 
       {/* Main Studio Body */}
@@ -255,31 +268,51 @@ export function App() {
         <div style={{ flex: 1, overflowY: 'auto', padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
           {/* Job Config bar */}
           <div style={{
-            background: '#131c31', padding: '16px 20px', borderRadius: 8,
-            border: '1px solid #1e293b', display: 'flex', gap: 20, alignItems: 'center'
+            background: c.bgSecondary,
+            padding: '16px 20px',
+            borderRadius: 12,
+            border: `1px solid ${c.border}`,
+            boxShadow: c.shadow,
+            display: 'flex',
+            gap: 20,
+            alignItems: 'center'
           }}>
             <div style={{ flex: 1 }}>
-              <label style={{ fontSize: 12, color: '#94a3b8', display: 'block', marginBottom: 4 }}>Job Name</label>
+              <label style={{ fontSize: 12, color: c.textMuted, display: 'block', marginBottom: 4 }}>Job Name</label>
               <input
                 type="text"
                 value={job.name}
                 onChange={(e) => setJob({ ...job, name: e.target.value })}
                 style={{
-                  width: '100%', background: '#090d16', border: '1px solid #334155',
-                  padding: '6px 10px', borderRadius: 6, color: '#f8fafc', fontSize: 14
+                  width: '100%',
+                  background: c.bgPrimary,
+                  border: `1px solid ${c.border}`,
+                  padding: '6px 10px',
+                  borderRadius: 6,
+                  color: c.textPrimary,
+                  fontSize: 14,
+                  outline: 'none',
+                  boxSizing: 'border-box'
                 }}
               />
             </div>
             <div style={{ width: 100 }}>
-              <label style={{ fontSize: 12, color: '#94a3b8', display: 'block', marginBottom: 4 }}>Iterations</label>
+              <label style={{ fontSize: 12, color: c.textMuted, display: 'block', marginBottom: 4 }}>Iterations</label>
               <input
                 type="number"
                 min={1}
                 value={job.iterations}
                 onChange={(e) => setJob({ ...job, iterations: parseInt(e.target.value) || 1 })}
                 style={{
-                  width: '100%', background: '#090d16', border: '1px solid #334155',
-                  padding: '6px 10px', borderRadius: 6, color: '#f8fafc', fontSize: 14
+                  width: '100%',
+                  background: c.bgPrimary,
+                  border: `1px solid ${c.border}`,
+                  padding: '6px 10px',
+                  borderRadius: 6,
+                  color: c.textPrimary,
+                  fontSize: 14,
+                  outline: 'none',
+                  boxSizing: 'border-box'
                 }}
               />
             </div>
@@ -287,14 +320,20 @@ export function App() {
 
           {/* Master Toolbox (Drag & Drop or Click to add) */}
           <div style={{
-            background: '#131c31', border: '1px solid #1e293b', borderRadius: 8, padding: '14px 18px',
-            display: 'flex', flexDirection: 'column', gap: 10
+            background: c.bgSecondary,
+            border: `1px solid ${c.border}`,
+            borderRadius: 12,
+            padding: '14px 18px',
+            boxShadow: c.shadow,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 10
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: '#38bdf8', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: c.accent, display: 'flex', alignItems: 'center', gap: 6 }}>
                 <Layers size={16} /> Action Master Toolbox
               </div>
-              <div style={{ fontSize: 11, color: '#64748b' }}>
+              <div style={{ fontSize: 11, color: c.textMuted }}>
                 Drag masters into the canvas or click to add
               </div>
             </div>
@@ -306,16 +345,23 @@ export function App() {
                 onDragStart={(e) => e.dataTransfer.setData('text/action', 'hook_window')}
                 onClick={() => addStep('hook_window')}
                 style={{
-                  background: '#090d16', border: '1px dashed #eab308', borderRadius: 6,
-                  padding: '8px 14px', display: 'flex', alignItems: 'center', gap: 8,
-                  cursor: 'grab', userSelect: 'none'
+                  background: c.bgPrimary,
+                  border: `1px dashed ${c.warning}`,
+                  borderRadius: 8,
+                  padding: '8px 14px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  cursor: 'grab',
+                  userSelect: 'none',
+                  transition: 'all 0.2s ease'
                 }}
               >
-                <GripVertical size={14} color="#64748b" />
-                <Crosshair size={16} color="#eab308" />
+                <GripVertical size={14} color={c.textMuted} />
+                <Crosshair size={16} color={c.warning} />
                 <div>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: '#f8fafc' }}>Hook Target Window</div>
-                  <div style={{ fontSize: 10, color: '#94a3b8' }}>Target browser title & PID</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: c.textPrimary }}>Hook Target Window</div>
+                  <div style={{ fontSize: 10, color: c.textMuted }}>Target browser title & PID</div>
                 </div>
               </div>
 
@@ -325,16 +371,23 @@ export function App() {
                 onDragStart={(e) => e.dataTransfer.setData('text/action', 'mouse_click')}
                 onClick={() => addStep('mouse_click')}
                 style={{
-                  background: '#090d16', border: '1px dashed #38bdf8', borderRadius: 6,
-                  padding: '8px 14px', display: 'flex', alignItems: 'center', gap: 8,
-                  cursor: 'grab', userSelect: 'none'
+                  background: c.bgPrimary,
+                  border: `1px dashed ${c.accent}`,
+                  borderRadius: 8,
+                  padding: '8px 14px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  cursor: 'grab',
+                  userSelect: 'none',
+                  transition: 'all 0.2s ease'
                 }}
               >
-                <GripVertical size={14} color="#64748b" />
-                <MousePointer size={16} color="#38bdf8" />
+                <GripVertical size={14} color={c.textMuted} />
+                <MousePointer size={16} color={c.accent} />
                 <div>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: '#f8fafc' }}>Mouse Click</div>
-                  <div style={{ fontSize: 10, color: '#94a3b8' }}>Regional jitter & pixel inspect</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: c.textPrimary }}>Mouse Click</div>
+                  <div style={{ fontSize: 10, color: c.textMuted }}>Regional jitter & pixel inspect</div>
                 </div>
               </div>
 
@@ -344,16 +397,23 @@ export function App() {
                 onDragStart={(e) => e.dataTransfer.setData('text/action', 'wait')}
                 onClick={() => addStep('wait')}
                 style={{
-                  background: '#090d16', border: '1px dashed #a855f7', borderRadius: 6,
-                  padding: '8px 14px', display: 'flex', alignItems: 'center', gap: 8,
-                  cursor: 'grab', userSelect: 'none'
+                  background: c.bgPrimary,
+                  border: '1px dashed #a855f7',
+                  borderRadius: 8,
+                  padding: '8px 14px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  cursor: 'grab',
+                  userSelect: 'none',
+                  transition: 'all 0.2s ease'
                 }}
               >
-                <GripVertical size={14} color="#64748b" />
+                <GripVertical size={14} color={c.textMuted} />
                 <Clock size={16} color="#a855f7" />
                 <div>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: '#f8fafc' }}>Wait Delay</div>
-                  <div style={{ fontSize: 10, color: '#94a3b8' }}>Interruptible pause</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: c.textPrimary }}>Wait Delay</div>
+                  <div style={{ fontSize: 10, color: c.textMuted }}>Interruptible pause</div>
                 </div>
               </div>
 
@@ -363,16 +423,23 @@ export function App() {
                 onDragStart={(e) => e.dataTransfer.setData('text/action', 'screenshot')}
                 onClick={() => addStep('screenshot')}
                 style={{
-                  background: '#090d16', border: '1px dashed #10b981', borderRadius: 6,
-                  padding: '8px 14px', display: 'flex', alignItems: 'center', gap: 8,
-                  cursor: 'grab', userSelect: 'none'
+                  background: c.bgPrimary,
+                  border: `1px dashed ${c.success}`,
+                  borderRadius: 8,
+                  padding: '8px 14px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  cursor: 'grab',
+                  userSelect: 'none',
+                  transition: 'all 0.2s ease'
                 }}
               >
-                <GripVertical size={14} color="#64748b" />
-                <Camera size={16} color="#10b981" />
+                <GripVertical size={14} color={c.textMuted} />
+                <Camera size={16} color={c.success} />
                 <div>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: '#f8fafc' }}>Screenshot</div>
-                  <div style={{ fontSize: 10, color: '#94a3b8' }}>Evidence & thumbnail</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: c.textPrimary }}>Screenshot</div>
+                  <div style={{ fontSize: 10, color: c.textMuted }}>Evidence & thumbnail</div>
                 </div>
               </div>
             </div>
@@ -389,26 +456,33 @@ export function App() {
               }
             }}
             style={{
-              display: 'flex', flexDirection: 'column', gap: 12, flex: 1,
-              background: '#0a0f1d', border: '2px dashed #1e293b', borderRadius: 10, padding: 18,
-              minHeight: 300
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 12,
+              flex: 1,
+              background: c.bgSecondary,
+              border: `2px dashed ${c.border}`,
+              borderRadius: 12,
+              padding: 18,
+              minHeight: 300,
+              boxShadow: c.shadow
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 15, fontWeight: 700 }}>
-                  <Layers size={18} color="#38bdf8" /> Workflow Canvas Pipeline ({job.steps.length} steps)
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 15, fontWeight: 700, color: c.textPrimary }}>
+                  <Layers size={18} color={c.accent} /> Workflow Canvas Pipeline ({job.steps.length} steps)
                 </div>
-                <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>
-                  💡 <span style={{ color: '#38bdf8', fontWeight: 600 }}>Double-click any step</span> to edit parameters (browser title, PID, countdown, clicks)
+                <div style={{ fontSize: 12, color: c.textMuted, marginTop: 2 }}>
+                  💡 <span style={{ color: c.accent, fontWeight: 600 }}>Double-click any step</span> to edit parameters (browser title, PID, countdown, clicks)
                 </div>
               </div>
             </div>
 
             {job.steps.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '50px 20px', color: '#475569' }}>
-                <Layers size={36} color="#334155" style={{ margin: '0 auto 10px auto' }} />
-                <div style={{ fontSize: 15, fontWeight: 600, color: '#94a3b8' }}>Canvas is Empty</div>
+              <div style={{ textAlign: 'center', padding: '50px 20px', color: c.textMuted }}>
+                <Layers size={36} color={c.textMuted} style={{ margin: '0 auto 10px auto', opacity: 0.5 }} />
+                <div style={{ fontSize: 15, fontWeight: 600, color: c.textSecondary }}>Canvas is Empty</div>
                 <div style={{ fontSize: 12, marginTop: 4 }}>Drag action masters from the toolbox above or click them to assemble your job.</div>
               </div>
             ) : (
@@ -475,6 +549,14 @@ export function App() {
         />
       )}
     </div>
+  );
+}
+
+export function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
   );
 }
 

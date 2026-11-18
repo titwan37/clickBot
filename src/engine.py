@@ -12,7 +12,7 @@ from src.window_hook import WindowHook
 logger = logging.getLogger("clickbot")
 
 class WorkflowEngine:
-    def __init__(self, evidence_dir: str = "assets/evidence"):
+    def __init__(self, evidence_dir: str = "evidence/"):
         self.clicker = ClickEngine()
         self.evidence = EvidenceRecorder(evidence_dir)
         self.hooker = WindowHook()

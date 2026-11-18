@@ -62,17 +62,17 @@ export const Header: React.FC<HeaderProps> = ({
         <button onClick={onSaveJob} style={{ ...btnBase, background: c.bgPrimary, color: c.textSecondary }}>
           <Save size={15} color={c.success} /> Save
         </button>
-
+        
         <div style={{ width: 1, height: 24, background: c.border, margin: '0 4px' }} />
 
         {/* Theme Toggle */}
-        <button
+        <button 
           onClick={toggleTheme}
           title={`Switch to ${theme.mode === 'dark' ? 'light' : 'dark'} mode`}
-          style={{
-            ...btnBase,
-            background: 'transparent',
-            border: 'none',
+          style={{ 
+            ...btnBase, 
+            background: 'transparent', 
+            border: 'none', 
             padding: 8,
             color: c.textSecondary
           }}

@@ -21,7 +21,7 @@ from src.engine import WorkflowEngine
 from src.region_selector import RegionSelector
 
 # Set up dedicated file and console logging
-logs_path = Path("assets/logs")
+logs_path = Path("logs")
 logs_path.mkdir(parents=True, exist_ok=True)
 log_file = logs_path / "clickbot.log"
 
@@ -61,12 +61,13 @@ app.add_middleware(
 # Ensure assets directory exists and mount it for static screenshot viewing
 assets_path = Path("assets")
 assets_path.mkdir(exist_ok=True)
-evidence_path = assets_path / "evidence"
-evidence_path.mkdir(exist_ok=True)
 workflows_path = assets_path / "workflows"
 workflows_path.mkdir(exist_ok=True)
+evidence_path = Path("evidence")
+evidence_path.mkdir(exist_ok=True)
 
 app.mount("/assets", StaticFiles(directory="assets"), name="assets")
+app.mount("/evidence", StaticFiles(directory="evidence"), name="evidence")
 
 engine = WorkflowEngine(evidence_dir=str(evidence_path))
 active_connections: List[WebSocket] = []

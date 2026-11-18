@@ -6,7 +6,7 @@ import pyautogui as pag
 from PIL import Image
 
 class EvidenceRecorder:
-    def __init__(self, base_dir: str = "assets/evidence"):
+    def __init__(self, base_dir: str = "evidence"):
         self.base_dir = Path(base_dir)
         self.base_dir.mkdir(parents=True, exist_ok=True)
 

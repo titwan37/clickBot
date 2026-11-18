@@ -14,7 +14,14 @@
       "duration": 1.0,
       "duration_range": null,
       "label": "hook_window",
-      "delay_seconds": 4
+      "delay_seconds": 4.0,
+      "hook_target": {
+        "window_title": "Boozt.com - The Nordic Department Online Store - Google Chrome",
+        "browser_type": "Google Chrome",
+        "process_name": "chrome.exe",
+        "pid": 12220,
+        "auto_find_by_title": true
+      }
     },
     {
       "step_id": "step_2",
@@ -26,7 +33,8 @@
       "duration": 1.0,
       "duration_range": null,
       "label": "before_click",
-      "delay_seconds": 5
+      "delay_seconds": 5.0,
+      "hook_target": null
     },
     {
       "step_id": "step_3",
@@ -43,7 +51,8 @@
       "duration": 1.0,
       "duration_range": null,
       "label": "evidence",
-      "delay_seconds": 5
+      "delay_seconds": 5.0,
+      "hook_target": null
     },
     {
       "step_id": "step_4",
@@ -55,7 +64,8 @@
       "duration": 5.6,
       "duration_range": null,
       "label": "wait",
-      "delay_seconds": 5
+      "delay_seconds": 5.0,
+      "hook_target": null
     },
     {
       "step_id": "step_5",
@@ -67,7 +77,8 @@
       "duration": 1.0,
       "duration_range": null,
       "label": "after_click",
-      "delay_seconds": 5
+      "delay_seconds": 5.0,
+      "hook_target": null
     }
   ]
 }

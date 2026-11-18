@@ -5,6 +5,8 @@ git status
 :: Get user input for commit message
 set /p commitMsg="Enter commit message: "
 
+git pull
+
 :: Add all files
 git add .
 
