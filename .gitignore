@@ -35,11 +35,11 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # Evidence and Logs (Keep folder structure, ignore generated session artifacts)
-assets/evidence/*.png
-assets/logs/*.log
-!assets/evidence/.gitkeep
-!assets/logs/.gitkeep
 !assets/workflows/
+evidence/*.png
+logs/*.log
+!evidence/.gitkeep
+!logs/.gitkeep
 
 # IDE / OS
 .vscode/
