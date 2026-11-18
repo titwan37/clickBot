@@ -1,0 +1,73 @@
+{
+  "job_id": "job_3448",
+  "name": "Gift Card Workflow",
+  "iterations": 1,
+  "delay_between_iterations": 1.0,
+  "steps": [
+    {
+      "step_id": "step_1",
+      "action": "hook_window",
+      "region": null,
+      "randomize": true,
+      "button": "left",
+      "clicks": 1,
+      "duration": 1.0,
+      "duration_range": null,
+      "label": "hook_window",
+      "delay_seconds": 4
+    },
+    {
+      "step_id": "step_2",
+      "action": "screenshot",
+      "region": null,
+      "randomize": true,
+      "button": "left",
+      "clicks": 1,
+      "duration": 1.0,
+      "duration_range": null,
+      "label": "before_click",
+      "delay_seconds": 5
+    },
+    {
+      "step_id": "step_3",
+      "action": "mouse_click",
+      "region": {
+        "left": 500,
+        "top": 400,
+        "width": 120,
+        "height": 40
+      },
+      "randomize": true,
+      "button": "left",
+      "clicks": 1,
+      "duration": 1.0,
+      "duration_range": null,
+      "label": "evidence",
+      "delay_seconds": 5
+    },
+    {
+      "step_id": "step_4",
+      "action": "wait",
+      "region": null,
+      "randomize": true,
+      "button": "left",
+      "clicks": 1,
+      "duration": 5.6,
+      "duration_range": null,
+      "label": "wait",
+      "delay_seconds": 5
+    },
+    {
+      "step_id": "step_5",
+      "action": "screenshot",
+      "region": null,
+      "randomize": true,
+      "button": "left",
+      "clicks": 1,
+      "duration": 1.0,
+      "duration_range": null,
+      "label": "after_click",
+      "delay_seconds": 5
+    }
+  ]
+}
